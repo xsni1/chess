@@ -8,26 +8,33 @@ class Piece:
         return self.symbol
 
 class Pawn(Piece):
-    symbol = "P"
+    symbol = 'P'
     def __init__(self, pos, team):
         super().__init__(pos, team)
 
 class Knight(Piece):
-    symbol = "K"
+    symbol = 'N'
     def __init__(self, pos, team):
         super().__init__(pos, team)
     
-    def possible_moves(self, start_pos): #sprawdzic czy pola nie sa zajete przez sojusznikow
-        return [[start_pos[0]-2, start_pos[1]+1], [start_pos[0]-2, start_pos[1]-1], [start_pos[0]+2, start_pos[1]+1], [start_pos[0]+2, start_pos[1]-1]]        
+    def possible_moves(self, start_pos): 
+        all_moves = [[start_pos[0]-2, start_pos[1]+1], [start_pos[0]-2, start_pos[1]-1], [start_pos[0]+2, start_pos[1]+1], [start_pos[0]+2, start_pos[1]-1]]
+        return [move for move in all_moves if move[0]>=0 and move[0]<=7 and move[1]>=0 and move[1]<=7 and (chessboard[move[0]][move[1]] == '.' or chessboard[move[0]][move[1]].team == 'B')]
+
+class Queen(Piece):
+    symbol = 'Q'
+    def __ini__(self, pos, team):
+        super().__init__(pos, team)
+    def possible_moves(self, start_pos):
+        return Bishop.possible_moves(start_pos) + Rook.possible_moves(start_pos)
 
 class Bishop(Piece):
-    symbol = "B"
+    symbol = 'B'
     def __init__(self, pos, team):
         super().__init__(pos, team)
-    
-    def possible_moves(self, start_pos):
+    @staticmethod
+    def possible_moves(start_pos):
         valid_moves = []
-        chessboard = board.BOARD
         x = start_pos[1]
         y = start_pos[0]
         #legal moves to the diagonal top right
@@ -57,21 +64,23 @@ class Bishop(Piece):
         return valid_moves
 
 class Rook(Piece):
-    symbol = "R"
+    symbol = 'R'
     def __init__(self, pos, team):
         super().__init__(pos, team)
 
     #check all and append all cells until met ally or enemy or outside of board
-    def possible_moves(self, start_pos):
+    @staticmethod
+    def possible_moves(start_pos):
         #zmienic teamy ze statycznych na zalezne od parametru
         valid_moves = []
+
         #legal moves "to the right"
         for x in range(start_pos[1]+1, 8):
             if board.BOARD[start_pos[0]][x] != '.' and board.BOARD[start_pos[0]][x].team == 'W':
                 break
             if board.BOARD[start_pos[0]][x] == '.' or board.BOARD[start_pos[0]][x].team == 'B':
                 valid_moves.append([start_pos[0], x])
-        
+
         #legal moves "to the left"
         for x in range(start_pos[1]-1, -1, -1):
             if board.BOARD[start_pos[0]][x] != '.' and board.BOARD[start_pos[0]][x].team == 'W':
@@ -99,20 +108,21 @@ class Rook(Piece):
 class Board:
     white_pieces = []
     def __init__(self):
-        self.BOARD = [["."]*8 for i in range(8)]
+        self.BOARD = [['.']*8 for i in range(8)]
 
     def place(self, pos, piece):
         self.BOARD[pos[0]][pos[1]] = piece
     
     def initWhites(self): #jedna funkcja dla obu druzyn?
         for i in range(8):
-            self.white_pieces.append(Pawn([6, i], "W"))
-        self.white_pieces.append(Rook([7, 0], "W"))
-        self.white_pieces.append(Rook([7, 7], "W"))
-        self.white_pieces.append(Knight([7, 1], "W"))
-        self.white_pieces.append(Knight([7, 6], "W"))
+            self.white_pieces.append(Pawn([6, i], 'W'))
+        self.white_pieces.append(Rook([7, 0], 'W'))
+        self.white_pieces.append(Rook([7, 7], 'W'))
+        self.white_pieces.append(Knight([7, 1], 'W'))
+        self.white_pieces.append(Knight([7, 6], 'W'))
         self.white_pieces.append(Bishop([7, 2], 'W'))
         self.white_pieces.append(Bishop([7, 5], 'W'))
+        self.white_pieces.append(Queen([7,3], 'W'))
 
     def valid_move(self, start_pos, target_pos):
         if target_pos in self.BOARD[start_pos[0]][start_pos[1]].possible_moves(start_pos): #czy nie za poza
@@ -133,9 +143,10 @@ class Board:
     
 
 board = Board()
+chessboard = board.BOARD
 board.initWhites()
 board.printBoard()
-move = input() # "a3d4" a3 current location d4 target location
-current_pos = [7-int(move[1])+1, ord(move[0])-97]
-target_pos = [7-int(move[3])+1, ord(move[2])-97]
-board.printBoard()
+#print(chessboard[3][4].possible_moves([3, 4]))
+#move = input() # "a3d4" a3 current location d4 target location
+#current_pos = [7-int(move[1])+1, ord(move[0])-97]
+#target_pos = [7-int(move[3])+1, ord(move[2])-97]
