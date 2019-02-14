@@ -7,10 +7,31 @@ class Piece:
     def __str__(self):
         return self.symbol
 
-class Pawn(Piece):
-    symbol = 'P'
+class King(Piece):
+    symbol = 'K'
     def __init__(self, pos, team):
         super().__init__(pos, team)
+    def possible_moves(self, start_pos):
+        return []
+
+class Pawn(Piece):
+    symbol = 'P'
+    moved = False
+    def __init__(self, pos, team):
+        super().__init__(pos, team)
+    def possible_moves(self, start_pos):
+        if self.team == 'W':
+            direction = -1
+        else:
+            direction = 1
+        attacking_moves = [[start_pos[0] + direction, start_pos[1] - direction], [start_pos[0] + direction, start_pos[1] + direction]]
+        attacking_moves = list(filter(lambda move: move[0]>=0 and move[0]<=7 and move[1] >= 0 and move[1] <= 7 and chessboard[move[0]][move[1]] != '.' and chessboard[move[0]][move[1]].team != chessboard[start_pos[0]][start_pos[1]].team, attacking_moves))
+        if not self.moved:
+            all_moves = [[start_pos[0] + direction, start_pos[1]], [start_pos[0] + 2*direction, start_pos[1]]]
+        else:
+            all_moves = [[start_pos[0] + direction, start_pos[1]]]
+        self.attacking = False
+        return [move for move in all_moves if move[0]>=0 and move[0] <= 7 and chessboard[move[0]][move[1]] == '.'] + attacking_moves if chessboard[start_pos[0] + direction][start_pos[1]] == '.' else [] #pawn can only move if there is no figure in front of it
 
 class Knight(Piece):
     symbol = 'N'
@@ -118,7 +139,7 @@ class Board:
             self.white_pieces.append(Pawn([6, i], 'W'))
         self.white_pieces.append(Rook([7, 0], 'W'))
         self.white_pieces.append(Rook([7, 7], 'W'))
-        self.white_pieces.append(Knight([7, 1], 'W'))
+        self.white_pieces.append(Knight([7, 1], 'B'))
         self.white_pieces.append(Knight([7, 6], 'W'))
         self.white_pieces.append(Bishop([7, 2], 'W'))
         self.white_pieces.append(Bishop([7, 5], 'W'))
@@ -130,23 +151,33 @@ class Board:
 
     def move(self, start_pos, target_pos):
         if self.valid_move(start_pos, target_pos):
+            if self.BOARD[start_pos[0]][start_pos[1]].symbol == 'P':
+                self.BOARD[start_pos[0]][start_pos[1]].moved = True
+            self.BOARD[start_pos[0]][start_pos[1]].pos = [[target_pos[0]], [target_pos[1]]]
             self.BOARD[target_pos[0]][target_pos[1]] = self.BOARD[start_pos[0]][start_pos[1]]  #jak mozna unzipowac zamiast target_pos[0] i [1]
             self.BOARD[start_pos[0]][start_pos[1]] = '.'
         else:
             print('Move not legal')
 
     def printBoard(self):
+        ind = 8
         for i in self.BOARD:
             for j in i:
-                print(j, end="")
-            print('')
+                print(str(j) + ' ', end="")
+            print(' ' + str(ind))
+            ind -= 1
+        print('')
+        for i in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
+            print(i + ' ', end='')
     
 
 board = Board()
 chessboard = board.BOARD
 board.initWhites()
-board.printBoard()
-#print(chessboard[3][4].possible_moves([3, 4]))
-#move = input() # "a3d4" a3 current location d4 target location
-#current_pos = [7-int(move[1])+1, ord(move[0])-97]
-#target_pos = [7-int(move[3])+1, ord(move[2])-97]
+while True:
+    board.printBoard()
+    print('\nyour move:')
+    move = input() # "a3d4" a3 current location d4 target location
+    current_pos = [7-int(move[1])+1, ord(move[0])-97]
+    target_pos = [7-int(move[3])+1, ord(move[2])-97]
+    board.move(current_pos, target_pos)
