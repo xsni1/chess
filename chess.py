@@ -12,7 +12,9 @@ class King(Piece):
     def __init__(self, pos, team):
         super().__init__(pos, team)
     def possible_moves(self, start_pos):
-        return []
+        all_moves = [[start_pos[0]+1, start_pos[1]+1], [start_pos[0], start_pos[1]+1], [start_pos[0], start_pos[1]-1], 
+        [start_pos[0]+1, start_pos[1]], [start_pos[0]-1, start_pos[1]], [start_pos[0]-1, start_pos[1]-1], [start_pos[0]-1, start_pos[1]+1], [start_pos[0]+1, start_pos[1]-1]]
+        return [move for move in all_moves if move[0]>=0 and move[0]<=7 and move[1]>=0 and move[1]<=7 and (chessboard[move[0]][move[1]] == '.' or chessboard[move[0]][move[1]].team != chessboard[start_pos[0]][start_pos[1]].team)]
 
 class Pawn(Piece):
     symbol = 'P'
@@ -40,7 +42,7 @@ class Knight(Piece):
     
     def possible_moves(self, start_pos): 
         all_moves = [[start_pos[0]-2, start_pos[1]+1], [start_pos[0]-2, start_pos[1]-1], [start_pos[0]+2, start_pos[1]+1], [start_pos[0]+2, start_pos[1]-1]]
-        return [move for move in all_moves if move[0]>=0 and move[0]<=7 and move[1]>=0 and move[1]<=7 and (chessboard[move[0]][move[1]] == '.' or chessboard[move[0]][move[1]].team == 'B')]
+        return [move for move in all_moves if move[0]>=0 and move[0]<=7 and move[1]>=0 and move[1]<=7 and (chessboard[move[0]][move[1]] == '.' or chessboard[move[0]][move[1]].team != chessboard[start_pos[0]][start_pos[1]].team)]
 
 class Queen(Piece):
     symbol = 'Q'
@@ -143,7 +145,8 @@ class Board:
         self.white_pieces.append(Knight([7, 6], 'W'))
         self.white_pieces.append(Bishop([7, 2], 'W'))
         self.white_pieces.append(Bishop([7, 5], 'W'))
-        self.white_pieces.append(Queen([7,3], 'W'))
+        self.white_pieces.append(Queen([7, 3], 'W'))
+        self.white_pieces.append(King([7, 4], 'W'))
 
     def valid_move(self, start_pos, target_pos):
         if target_pos in self.BOARD[start_pos[0]][start_pos[1]].possible_moves(start_pos): #czy nie za poza
