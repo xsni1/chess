@@ -13,7 +13,7 @@ class King(Piece):
     symbol = 'K'
     def __init__(self, pos, team):
         super().__init__(pos, team)
-    def possible_moves(self, start_pos):
+    def possible_moves(self, start_pos): #automatyczne pobieranie pozycji?
         all_moves = [[start_pos[0]+1, start_pos[1]+1], [start_pos[0], start_pos[1]+1], [start_pos[0], start_pos[1]-1], 
         [start_pos[0]+1, start_pos[1]], [start_pos[0]-1, start_pos[1]], [start_pos[0]-1, start_pos[1]-1], [start_pos[0]-1, start_pos[1]+1], [start_pos[0]+1, start_pos[1]-1]]
         return [move for move in all_moves if move[0]>=0 and move[0]<=7 and move[1]>=0 and move[1]<=7 and (chessboard[move[0]][move[1]] == '.' 
@@ -45,7 +45,8 @@ class Knight(Piece):
         super().__init__(pos, team)
     
     def possible_moves(self, start_pos): 
-        all_moves = [[start_pos[0]-2, start_pos[1]+1], [start_pos[0]-2, start_pos[1]-1], [start_pos[0]+2, start_pos[1]+1], [start_pos[0]+2, start_pos[1]-1]]
+        all_moves = [[start_pos[0]-2, start_pos[1]+1], [start_pos[0]-2, start_pos[1]-1], [start_pos[0]+2, start_pos[1]+1], [start_pos[0]+2, start_pos[1]-1], 
+        [start_pos[0]+1, start_pos[1]-2],[start_pos[0]-1, start_pos[1]-2], [start_pos[0]+1, start_pos[1]+2], [start_pos[0]-1, start_pos[1]+2]]
         return [move for move in all_moves if move[0]>=0 and move[0]<=7 and move[1]>=0 and move[1]<=7 and (chessboard[move[0]][move[1]] == '.' 
         or chessboard[move[0]][move[1]].team != chessboard[start_pos[0]][start_pos[1]].team)]
 
@@ -134,10 +135,10 @@ class Rook(Piece):
 
 
 class Board:
-    white_pieces = []
-    black_pieces = []
     def __init__(self):
         self.BOARD = [['.']*8 for i in range(8)]
+        self.white_pieces = []
+        self.black_pieces = []
 
     def place(self, pos, piece):
         self.BOARD[pos[0]][pos[1]] = piece
@@ -150,10 +151,12 @@ class Board:
             self.white_pieces.append(Rook([7, 7], 'W'))
             self.white_pieces.append(Knight([7, 1], 'W'))
             self.white_pieces.append(Knight([7, 6], 'W'))
-            self.white_pieces.append(Bishop([7, 2], 'W'))
-            self.white_pieces.append(Bishop([7, 5], 'W'))
-            self.white_pieces.append(Queen([7, 3], 'W'))
-            self.white_pieces.append(King([7, 4], 'W'))
+            #self.white_pieces.append(Bishop([7, 2], 'W'))
+            #self.white_pieces.append(Bishop([7, 5], 'W'))
+            #self.white_pieces.append(Queen([7, 3], 'W'))
+            self.white_king = King([7, 4], 'W')
+            self.white_pieces.append(self.white_king)
+
         def initWhites():
             for i in range(8):
                 self.black_pieces.append(Pawn([1, i], 'B'))
@@ -164,7 +167,8 @@ class Board:
             self.black_pieces.append(Bishop([0, 2], 'B'))
             self.black_pieces.append(Bishop([0, 5], 'B'))
             self.black_pieces.append(Queen([0, 3], 'B'))
-            self.black_pieces.append(King([0, 4], 'B'))
+            self.black_king = King([0, 4], 'B')
+            self.black_pieces.append(self.black_king)
         initBlacks()
         initWhites()
 
@@ -193,12 +197,18 @@ class Board:
         for i in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']:
             print(i + ' ', end='')
     
+    def isCheck(self):
+        for move in board.white_king.possible_moves + board.white_king.pos:
+            print(move)
+
+    
 
 
 board = Board()
 chessboard = board.BOARD
 board.initBoard()
-print(board.white_pieces)
+for move in board.white_king.possible_moves(board.white_king.pos) + [board.white_king.pos]:
+    print(move)
 while True:
     board.printBoard()
     print('\nyour move:')
