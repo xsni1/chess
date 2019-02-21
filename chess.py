@@ -24,7 +24,7 @@ class Pawn(Piece):
     moved = False
     def __init__(self, pos, team):
         super().__init__(pos, team)
-    def possible_moves(self, start_pos):
+    def possible_moves(self, start_pos, checkCheck=False):
         if self.team == 'W':
             direction = -1
         else:
@@ -37,6 +37,8 @@ class Pawn(Piece):
         else:
             all_moves = [[start_pos[0] + direction, start_pos[1]]]
         self.attacking = False
+        if checkCheck:
+            return attacking_moves
         return [move for move in all_moves if move[0]>=0 and move[0] <= 7 and chessboard[move[0]][move[1]] == '.'] + attacking_moves 
 
 class Knight(Piece):
@@ -180,7 +182,7 @@ class Board:
         if self.valid_move(start_pos, target_pos):
             if self.BOARD[start_pos[0]][start_pos[1]].symbol == 'P':
                 self.BOARD[start_pos[0]][start_pos[1]].moved = True
-            self.BOARD[start_pos[0]][start_pos[1]].pos = [[target_pos[0]], [target_pos[1]]]
+            self.BOARD[start_pos[0]][start_pos[1]].pos = [target_pos[0], target_pos[1]]
             self.BOARD[target_pos[0]][target_pos[1]] = self.BOARD[start_pos[0]][start_pos[1]]  #jak mozna unzipowac zamiast target_pos[0] i [1]
             self.BOARD[start_pos[0]][start_pos[1]] = '.'
         else:
@@ -198,8 +200,18 @@ class Board:
             print(i + ' ', end='')
     
     def isCheck(self):
-        for move in board.white_king.possible_moves + board.white_king.pos:
-            print(move)
+        counter = len(board.white_king.possible_moves([board.white_king.pos[0], board.white_king.pos[1]]) + [board.white_king.pos])
+        for move in board.white_king.possible_moves([board.white_king.pos[0], board.white_king.pos[1]]) + [board.white_king.pos]:
+            for piece in board.black_pieces:
+                if piece.symbol == 'P':
+                    if move in piece.possible_moves(piece.pos, True):
+                        counter -= 1
+                        print(move)
+                else:
+                    if move in piece.possible_moves(piece.pos):
+                        print(move)
+                        counter -= 1
+        print(counter)
 
     
 
@@ -207,13 +219,11 @@ class Board:
 board = Board()
 chessboard = board.BOARD
 board.initBoard()
-for move in board.white_king.possible_moves(board.white_king.pos) + [board.white_king.pos]:
-    print(move)
 while True:
+    board.isCheck()
     board.printBoard()
     print('\nyour move:')
     move = input() # "a3d4" a3 current location d4 target location
     current_pos = [7-int(move[1])+1, ord(move[0])-97]
     target_pos = [7-int(move[3])+1, ord(move[2])-97]
-    print(target_pos + current_pos)
     board.move(current_pos, target_pos)
