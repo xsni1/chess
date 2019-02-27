@@ -180,6 +180,12 @@ class Board:
 
     def move(self, start_pos, target_pos):
         if self.valid_move(start_pos, target_pos):
+            if self.BOARD[target_pos[0]][target_pos[1]] != '.':
+                if self.BOARD[target_pos[0]][target_pos[1]].team == 'W':
+                    self.white_pieces.remove(self.BOARD[target_pos[0]][target_pos[1]])
+                else:
+                    self.black_pieces.remove(self.BOARD[target_pos[0]][target_pos[1]])
+                print(self.black_pieces)
             if self.BOARD[start_pos[0]][start_pos[1]].symbol == 'P':
                 self.BOARD[start_pos[0]][start_pos[1]].moved = True
             self.BOARD[start_pos[0]][start_pos[1]].pos = [target_pos[0], target_pos[1]]
@@ -200,18 +206,10 @@ class Board:
             print(i + ' ', end='')
     
     def isCheck(self):
-        counter = len(board.white_king.possible_moves([board.white_king.pos[0], board.white_king.pos[1]]) + [board.white_king.pos])
-        for move in board.white_king.possible_moves([board.white_king.pos[0], board.white_king.pos[1]]) + [board.white_king.pos]:
-            for piece in board.black_pieces:
-                if piece.symbol == 'P':
-                    if move in piece.possible_moves(piece.pos, True):
-                        counter -= 1
-                        print(move)
-                else:
-                    if move in piece.possible_moves(piece.pos):
-                        print(move)
-                        counter -= 1
-        print(counter)
+        for black in self.black_pieces:
+            for move in black.possible_moves(black.pos):
+                if (move == self.white_king.pos):
+                    return True
 
     
 
@@ -220,10 +218,14 @@ board = Board()
 chessboard = board.BOARD
 board.initBoard()
 while True:
-    board.isCheck()
+    if board.isCheck():
+        print('CHECK')
     board.printBoard()
     print('\nyour move:')
     move = input() # "a3d4" a3 current location d4 target location
+    
     current_pos = [7-int(move[1])+1, ord(move[0])-97]
     target_pos = [7-int(move[3])+1, ord(move[2])-97]
+    
     board.move(current_pos, target_pos)
+    board.isCheck()
